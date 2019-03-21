@@ -58,7 +58,6 @@ const addLazyLineAndColumnOffsetProps = (
     [lineKey]: {
       configurable: false,
       enumerable: true,
-      writable: false,
       get: () => {
         if (!lineAndColumn) {
           lineAndColumn = dumbLineAndColumnFrom(params.script, params.chunk);
@@ -69,7 +68,6 @@ const addLazyLineAndColumnOffsetProps = (
     [columnKey]: {
       configurable: false,
       enumerable: true,
-      writable: false,
       get: () => {
         if (!lineAndColumn) {
           lineAndColumn = dumbLineAndColumnFrom(params.script, params.chunk);
@@ -87,8 +85,8 @@ const buildLocalContext = (params: IEvaluateParams): LocalContext => {
     __filename: params.path,
     __type: params.type,
     __path: params.path,
-    __line: 0,
     __column: 0,
+    __line: 0,
   };
 
   addLazyLineAndColumnOffsetProps('__line', '__column', context, params);
@@ -130,7 +128,11 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
     options
   );
 
-  if (newValue === null || newValue === undefined) {
+  if (
+    newValue === null ||
+    newValue === undefined ||
+    typeof newValue === 'function'
+  ) {
     return {
       action: 'remove',
     };
@@ -230,7 +232,38 @@ const renderJsonAndYaml = (renderParams: IRenderParams) => {
   };
 };
 
-export const evalContents = (context: EvaluatedObjectCtx = {}) => {
+const transformContents = (
+  entry: IInputEntry,
+  context: EvaluatedObjectCtx,
+  stream: Observable<string>
+) =>
+  stream.pipe(
+    renderJsonAndYaml({
+      path: entry.path,
+      type: entry.type,
+      context,
+    })
+  );
+
+export const internals = {
+  transformContents,
+  renderJsonAndYaml,
+  processJson,
+  buildEvaluateLeafCb,
+  evaluate,
+  buildLocalContext,
+  addLazyLineAndColumnOffsetProps,
+  dumbLineAndColumnFrom,
+};
+
+const topDeps = {
+  transformContents,
+};
+
+export const evalContents = (
+  context: EvaluatedObjectCtx = {},
+  deps = topDeps
+) => {
   const evalContentsOperator = (
     stream: Observable<IInputEntry>
   ): Observable<IOutputEntry> =>
@@ -238,14 +271,10 @@ export const evalContents = (context: EvaluatedObjectCtx = {}) => {
       map(arg => ({
         path: arg.path,
         type: arg.type,
-        contents: arg.contents.pipe(
-          renderJsonAndYaml({
-            path: arg.path,
-            type: arg.type,
-            context,
-          })
-        ),
+        contents: deps.transformContents(arg, context, arg.contents),
       }))
     );
   return evalContentsOperator;
 };
+
+evalContents.deps = topDeps;

@@ -6,7 +6,8 @@
     "allowJs": false,
     "noEmit": false,
     "declaration": true,
-    "emitDeclarationOnly": true
+    "emitDeclarationOnly": true,
+    "paths": { "@src": ["./src"], "@src/*": ["./src/*"] }
   },
   "include": ["src"],
   "exclude": ["src/**/__tests__/**", "src/__integration-tests__/**"]
