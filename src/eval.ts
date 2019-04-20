@@ -42,7 +42,12 @@ const dumbLineAndColumnFrom = (
   const lines = linesBefore.match(EOLRegexp) || [];
   const lastLineIndex = linesBefore.lastIndexOf(EOL);
   const line = lines.length;
-  const col = index - ((lastLineIndex > 0 && lastLineIndex) || 0) - 1;
+  const col =
+    index -
+    (lastLineIndex > 0 && typeof lastLineIndex === 'number'
+      ? lastLineIndex
+      : 0) -
+    1;
   return [line, col];
 };
 
@@ -124,7 +129,7 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
     params
   );
 
-  const newValue = vm.runInContext(
+  const newValue: unknown = vm.runInContext(
     finalScript,
     vm.createContext(context),
     options
@@ -177,7 +182,7 @@ const buildEvaluateLeafCb = (
 };
 
 const processYaml = (chunk: string, renderParams: IRenderParams) => {
-  const loaded = yaml.safeLoadAll(chunk);
+  const loaded = yaml.safeLoadAll(chunk) as Array<{} | null>;
 
   const combined = [];
 
@@ -197,7 +202,7 @@ const processYaml = (chunk: string, renderParams: IRenderParams) => {
 };
 
 const processJson = (chunk: string, renderParams: IRenderParams) => {
-  const doc = JSON.parse(chunk);
+  const doc = JSON.parse(chunk) as {};
 
   const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(chunk, renderParams);
 

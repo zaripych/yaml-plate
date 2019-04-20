@@ -21,7 +21,7 @@ export const filePathStream = (patterns: string | string[]) => {
 };
 
 const typeFromExtensionMap: {
-  [key: string]: SourceType;
+  [key: string]: SourceType | undefined;
 } = {
   '.json': 'json',
   '.yaml': 'yaml',

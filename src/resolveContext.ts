@@ -1,8 +1,8 @@
 import { IEvaluateConfig, EvaluatedObjectCtx, FnCtx } from './types';
 
 function interopRequireDefault<T>(
-  obj: T | { __esModule: true; default: T }
-): { default: T } {
+  obj: T | { __esModule: true; default: T } | undefined
+): { default: T | undefined } {
   if (!obj) {
     return {
       default: obj,
@@ -31,7 +31,7 @@ export async function resolveContext(
 ): Promise<EvaluatedObjectCtx> {
   if (typeof context === 'string') {
     const result = interopRequireDefault<EvaluatedObjectCtx | FnCtx>(
-      require(context)
+      require(context) as {}
     ).default;
     return resolve(result);
   }

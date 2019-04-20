@@ -1,9 +1,8 @@
-// tslint:disable-next-line:no-any
-function isIterable(obj: any): obj is Iterable<unknown> {
-  // checks for null and undefined
-  if (obj == null) {
+function isIterable(obj?: unknown): obj is Iterable<unknown> {
+  if (typeof obj !== 'object' || obj === null) {
     return false;
   }
+  // @ts-ignore
   return typeof obj[Symbol.iterator] === 'function';
 }
 
