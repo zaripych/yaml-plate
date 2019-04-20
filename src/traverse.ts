@@ -62,7 +62,7 @@ function actOnObject(
     });
     set.add(value);
   } else if (typeof value === 'string') {
-    const result = leafVisitor(valuePath, value);
+    const result = leafVisitor(value, valuePath);
 
     if (result.action === 'set') {
       current[key] = result.newValue;
@@ -100,7 +100,7 @@ function actOnArray(
     });
     set.add(value);
   } else if (typeof value === 'string') {
-    const result = leafVisitor(valuePath, value);
+    const result = leafVisitor(value, valuePath);
 
     if (result.action === 'set') {
       current[i] = result.newValue;

@@ -109,6 +109,8 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
 
   const modifiedScript = (spread && script.substr(spread.length + 1)) || script;
 
+  const finalScript = `(${modifiedScript})`;
+
   const options = {
     filename: path,
     lineOffset: 0,
@@ -123,30 +125,28 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
   );
 
   const newValue = vm.runInContext(
-    modifiedScript,
+    finalScript,
     vm.createContext(context),
     options
   );
 
   if (
-    newValue === null ||
-    newValue === undefined ||
-    typeof newValue === 'function'
+    (typeof newValue !== 'string' &&
+      typeof newValue !== 'object' &&
+      !Array.isArray(newValue)) ||
+    newValue === null
   ) {
     return {
       action: 'remove',
     };
-  } else if (spread) {
-    if (Array.isArray(newValue) || typeof newValue === 'object') {
-      return {
-        action: 'spread',
-        values: newValue,
-      };
-    } else {
-      return {
-        action: 'remove',
-      };
-    }
+  } else if (
+    spread &&
+    (Array.isArray(newValue) || typeof newValue === 'object')
+  ) {
+    return {
+      action: 'spread',
+      values: newValue,
+    };
   } else {
     return {
       action: 'set',
@@ -159,25 +159,21 @@ const buildEvaluateLeafCb = (
   chunk: string,
   renderParams: IRenderParams
 ): LeafVisitor => (val, path) => {
-  const scriptRegexResult = ScriptRegexp.exec(val);
+  const scriptRegexResult = ScriptRegexp.exec(val /*?*/);
   if (!scriptRegexResult || scriptRegexResult.length < 1) {
     return {
       action: 'ignore',
     };
   }
 
-  try {
-    const script = scriptRegexResult[1];
+  const script = scriptRegexResult[1];
 
-    return evaluate({
-      chunk,
-      script,
-      path,
-      ...renderParams,
-    });
-  } catch (err) {
-    throw err;
-  }
+  return evaluate({
+    chunk,
+    script,
+    path,
+    ...renderParams,
+  });
 };
 
 const processYaml = (chunk: string, renderParams: IRenderParams) => {
@@ -188,12 +184,16 @@ const processYaml = (chunk: string, renderParams: IRenderParams) => {
   const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(chunk, renderParams);
 
   for (const doc of loaded) {
-    traverseAndMutate(doc, evaluateLeaf);
+    if (doc) {
+      traverseAndMutate(doc, evaluateLeaf);
 
-    combined.push(yaml.dump(doc));
+      combined.push(yaml.dump(doc));
+    } else {
+      combined.push('');
+    }
   }
 
-  return combined.join(`${EOL}---${EOL}`);
+  return combined.join(`---${EOL}`);
 };
 
 const processJson = (chunk: string, renderParams: IRenderParams) => {
@@ -248,6 +248,7 @@ const transformContents = (
 export const internals = {
   transformContents,
   renderJsonAndYaml,
+  processYaml,
   processJson,
   buildEvaluateLeafCb,
   evaluate,
