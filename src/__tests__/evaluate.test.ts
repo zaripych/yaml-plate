@@ -36,7 +36,7 @@ describe('given script returning text value', () => {
 
 describe('given script returning object', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ { test: "q", another: "B" } }',
     context: {},
     path: 'input.txt',
     script: '{ test: "q", another: "B" }',
@@ -51,9 +51,36 @@ describe('given script returning object', () => {
   });
 });
 
+describe('given script returning object with references to self', () => {
+  const instance = {
+    value: null,
+  } as {
+    value: null | {};
+  };
+
+  instance.value = instance;
+
+  const params: Params[0] = {
+    chunk: 'hello ${ instance }',
+    context: {
+      instance,
+    },
+    path: 'input.txt',
+    script: '{ instance }',
+    type: 'yaml',
+  };
+
+  it('should work, we do not check for circular references at this moment', () => {
+    expect(evaluate(params)).toEqual({
+      action: 'set',
+      newValue: { instance },
+    });
+  });
+});
+
 describe('given script returning array', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ ["one", "two"] }',
     context: {},
     path: 'input.txt',
     script: '["one", "two"]',
@@ -70,7 +97,7 @@ describe('given script returning array', () => {
 
 describe('given script returning empty array', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ [] }',
     context: {},
     path: 'input.txt',
     script: '[]',
@@ -87,7 +114,7 @@ describe('given script returning empty array', () => {
 
 describe('given script spreading an object', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ ...{ otherProp: "value" } }',
     context: {},
     path: 'input.txt',
     script: '...{ otherProp: "value" }',
@@ -104,7 +131,7 @@ describe('given script spreading an object', () => {
 
 describe('given script spreading an array', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ ...[1, 2, 3] }',
     context: {},
     path: 'input.txt',
     script: '...[1, 2, 3]',
@@ -121,7 +148,7 @@ describe('given script spreading an array', () => {
 
 describe('given script returning empty object', () => {
   const params: Params[0] = {
-    chunk: 'hello ${ { test: "q" } }',
+    chunk: 'hello ${ {} }',
     context: {},
     path: 'input.txt',
     script: '{}',

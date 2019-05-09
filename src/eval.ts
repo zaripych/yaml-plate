@@ -1,6 +1,6 @@
 import vm from 'vm';
-import { Observable } from 'rxjs';
-import { map, toArray } from 'rxjs/operators';
+import { Observable, of, empty } from 'rxjs';
+import { map, toArray, switchMap } from 'rxjs/operators';
 import yaml from 'js-yaml';
 import {
   IInputEntry,
@@ -164,7 +164,7 @@ const buildEvaluateLeafCb = (
   chunk: string,
   renderParams: IRenderParams
 ): LeafVisitor => (val, path) => {
-  const scriptRegexResult = ScriptRegexp.exec(val /*?*/);
+  const scriptRegexResult = ScriptRegexp.exec(val);
   if (!scriptRegexResult || scriptRegexResult.length < 1) {
     return {
       action: 'ignore',
@@ -220,7 +220,7 @@ const renderJsonAndYaml = (renderParams: IRenderParams) => {
     return new Observable<string>(subscriber => {
       const results = stream.pipe(
         toArray(),
-        map(items => items.join('')),
+        switchMap(items => (items.length > 0 ? of(items.join('')) : empty())),
         map(chunk => {
           if (renderParams.type === 'yaml') {
             return processYaml(chunk, renderParams);
@@ -237,21 +237,7 @@ const renderJsonAndYaml = (renderParams: IRenderParams) => {
   };
 };
 
-const transformContents = (
-  entry: IInputEntry,
-  context: EvaluatedObjectCtx,
-  stream: Observable<string>
-) =>
-  stream.pipe(
-    renderJsonAndYaml({
-      path: entry.path,
-      type: entry.type,
-      context,
-    })
-  );
-
 export const internals = {
-  transformContents,
   renderJsonAndYaml,
   processYaml,
   processJson,
@@ -263,7 +249,7 @@ export const internals = {
 };
 
 const topDeps = {
-  transformContents,
+  renderJsonAndYaml,
 };
 
 export const evalContents = (
@@ -277,7 +263,13 @@ export const evalContents = (
       map(arg => ({
         path: arg.path,
         type: arg.type,
-        contents: deps.transformContents(arg, context, arg.contents),
+        contents: arg.contents.pipe(
+          deps.renderJsonAndYaml({
+            context,
+            path: arg.path,
+            type: arg.type,
+          })
+        ),
       }))
     );
   return evalContentsOperator;

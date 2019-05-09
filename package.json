@@ -1,4 +1,10 @@
 {
+  "name": "yaml-plate",
+  "version": "0.0.1",
+  "description": "Simple YAML templating using JavaScript",
+  "main": "index.js",
+  "author": "@zaripych",
+  "license": "MIT",
   "scripts": {
     "build": "node ./scripts/build.js",
     "declarations": "tsc -p ./tsconfig.declarations.json",
@@ -20,23 +26,19 @@
       "pre-push": "npm run check"
     }
   },
-  "name": "yaml-plate",
-  "version": "0.0.1",
-  "description": "Simple YAML/json/txt templating using JavaScript",
-  "main": "index.js",
-  "author": "@zaripych",
-  "license": "MIT",
   "dependencies": {
+    "@types/yargs": "13.0.0",
     "fast-glob": "2.2.6",
     "fs-extra": "7.0.1",
-    "js-yaml": "3.12.2",
+    "js-yaml": "3.13.1",
     "rxjs": "6.4.0",
     "rxjs-marbles": "5.0.0",
-    "rxjs-stream": "3.0.1"
+    "rxjs-stream": "3.0.1",
+    "yargs": "13.2.2"
   },
   "devDependencies": {
-    "@types/js-yaml": "3.12.0",
+    "@types/js-yaml": "3.12.1",
     "@types/node": "8.10.40",
-    "ts-deps": "0.2.0"
+    "ts-deps": "0.3.1"
   }
 }

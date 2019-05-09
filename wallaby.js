@@ -4,7 +4,7 @@ module.exports = function(wallaby) {
   });
 
   return {
-    files: ['src/**/*.ts', '!src/**/__tests__/**/*.test.ts'],
+    files: ['src/**/*.ts', 'src/**/*.js', '!src/**/__tests__/**/*.test.ts'],
 
     tests: ['src/**/__tests__/**/*.test.ts'],
 

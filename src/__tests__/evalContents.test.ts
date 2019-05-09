@@ -53,7 +53,7 @@ describe('evalContents', () => {
     };
 
     const deps: typeof evalContents.deps = {
-      transformContents: jest.fn(() => '[empty]') as any,
+      renderJsonAndYaml: jest.fn(() => () => '[empty]') as any,
     };
 
     it(
