@@ -1,7 +1,5 @@
 out
 node_modules
-.dev.env
-.env.local
 coverage
 coverage-*
 lib
@@ -9,4 +7,5 @@ lib
 yarn-error.log
 package
 .pnp
-
+integration-test-*
+yaml-plate-*.tgz

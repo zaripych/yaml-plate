@@ -1,7 +1,13 @@
 import { evalContents } from './eval';
 import { fileContentsStream } from './filesStreams';
 import { Observable, from, defer } from 'rxjs';
-import { IEvaluateConfig, IOutputEntry } from './types';
+import {
+  IEvaluateConfig,
+  IOutputEntry,
+  Input,
+  IInputPattern,
+  InputStream,
+} from './types';
 import { resolveContext } from './resolveContext';
 import {
   switchMap,
@@ -10,9 +16,51 @@ import {
   groupBy,
   mergeAll,
   ignoreElements,
-  endWith,
+  reduce,
 } from 'rxjs/operators';
-import { writeCombined, writeContentsToDirectory } from './write';
+import {
+  writeCombinedYaml,
+  writeContentsToDirectory,
+  writeStdOut,
+} from './write';
+
+const compareStrings = (a: string, b: string) => (a === b ? 0 : a > b ? 1 : -1);
+
+function asPattern(input?: Input): IInputPattern | null {
+  return typeof input === 'string'
+    ? {
+        pattern: input,
+      }
+    : (typeof input === 'object' &&
+        input !== null &&
+        'pattern' in input &&
+        input) ||
+        null;
+}
+
+function asStream(input?: Input): InputStream | null {
+  return (
+    (typeof input !== 'string' &&
+      typeof input === 'object' &&
+      input !== null &&
+      'pipe' in input &&
+      input) ||
+    null
+  );
+}
+
+function sortConditionally<T>(sort: boolean, compare: (a: T, b: T) => number) {
+  return (stream: Observable<T>) =>
+    sort
+      ? stream.pipe(
+          reduce((acc, item) => [...acc, item], []),
+          switchMap(buffer => {
+            buffer.sort(compare);
+            return buffer;
+          })
+        )
+      : stream;
+}
 
 export const processInput = (
   params: IEvaluateConfig
@@ -20,21 +68,30 @@ export const processInput = (
   return defer(() =>
     from(resolveContext(params.context)).pipe(
       catchError(err => {
-        throw new Error(`An error when evaluating context: ${err}`);
+        throw err;
       }),
       switchMap(context => {
-        const inputStream =
-          typeof params.input === 'string'
-            ? fileContentsStream(params.input)
-            : params.input;
+        const pattern = asPattern(params.input);
 
-        if (typeof inputStream.pipe !== 'function') {
+        const inputStream = asStream(params.input);
+
+        const stream =
+          (pattern && fileContentsStream(pattern.pattern)) || inputStream;
+
+        if (!stream) {
           throw new Error(
-            'The .input is not a string, neither it is an RxJs 6 Observable, cannot continue'
+            'The .input is not a pattern, neither it is an RxJs 6 Observable, cannot continue'
           );
         }
 
-        return inputStream.pipe(evalContents(context));
+        const shouldSort = (pattern && pattern.sorted) || false;
+
+        return stream.pipe(
+          sortConditionally(shouldSort, (a, b) =>
+            compareStrings(a.path, b.path)
+          ),
+          evalContents(context)
+        );
       })
     )
   );
@@ -54,9 +111,12 @@ export const writeOutput = (params: IEvaluateConfig) => {
           typeof params.output.file === 'string' &&
           params.output.file
         ) {
+          if (group.key !== 'yaml') {
+            throw new Error('Only can write yaml into a single combined file');
+          }
           return group.pipe(
             map(item => item.contents),
-            writeCombined(params.output.file)
+            writeCombinedYaml(params.output.file)
           );
         } else if (
           'directory' in params.output &&
@@ -70,6 +130,11 @@ export const writeOutput = (params: IEvaluateConfig) => {
               }),
             })
           );
+        } else if ('stdout' in params.output && params.output.stdout === true) {
+          return group.pipe(
+            map(item => item.contents),
+            writeStdOut()
+          );
         } else {
           throw new Error('.output is not a directory or file');
         }
@@ -81,10 +146,14 @@ export const writeOutput = (params: IEvaluateConfig) => {
 };
 
 export const evaluate = (params: IEvaluateConfig) => {
-  return processInput(params)
-    .pipe(
-      writeOutput(params),
-      endWith(undefined)
-    )
-    .toPromise<void>();
+  const process = processInput(params).pipe(writeOutput(params));
+  return new Promise<void>((res, rej) => {
+    const sub = process.subscribe({
+      error: rej,
+      complete: () => {
+        sub.unsubscribe();
+        res();
+      },
+    });
+  });
 };

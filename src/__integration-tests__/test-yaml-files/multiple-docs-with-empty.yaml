@@ -1,0 +1,8 @@
+docId: 4
+content: Fourth document content
+attributes: ${attributesByDocId[4]}
+---
+docId: 5
+content: Fifth document content
+attributes: ${attributesByDocId[5]}
+---

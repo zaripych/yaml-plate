@@ -1,0 +1,48 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`yaml-plate when combining input into a single file should output the file 2`] = `
+"docId: 7
+content: Seventh document content
+attributes:
+  contributors:
+    - Hat Man
+---
+---
+docId: 8
+content: Eight document content
+contributors:
+  - Boss Man
+---
+---
+docId: 4
+content: Fourth document content
+attributes:
+  contributors:
+    - Homer
+---
+docId: 5
+content: Fifth document content
+attributes:
+  contributors:
+    - Beth
+---
+---
+docId: 1
+content: First document content
+attributes:
+  contributors:
+    - Rick
+---
+docId: 2
+content: Second document content
+attributes:
+  contributors:
+    - Morty
+---
+docId: 3
+content: Third document content
+attributes:
+  contributors:
+    - Mr. President
+"
+`;

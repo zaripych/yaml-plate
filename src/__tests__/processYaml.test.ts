@@ -8,15 +8,12 @@ created: '\${created.toFixed(0)}'`;
       created: 2019,
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`title: Test Yaml document
+    expect(internals.processYaml(chunk, renderParams))
+      .toEqual(`title: Test Yaml document
 created: '2019'
 `);
   });
@@ -31,15 +28,11 @@ describe('given valid yaml with a second level property', () => {
       author: 'Mark',
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`attributes:
+    expect(internals.processYaml(chunk, renderParams)).toEqual(`attributes:
   private: maybe
   author: Mark
 `);
@@ -54,15 +47,11 @@ describe('given valid yaml with an array property', () => {
       tags: ['draft', 'wip'],
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`attributes:
+    expect(internals.processYaml(chunk, renderParams)).toEqual(`attributes:
   tags:
     - draft
     - wip
@@ -78,21 +67,18 @@ describe('given valid yaml with spreaded array', () => {
 `;
   const renderParams = {
     context: {
-      otherContributors: ['Mr. President'],
+      otherContributors: ['Mr. President', 'Beth Smith'],
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`contributors:
+    expect(internals.processYaml(chunk, renderParams)).toEqual(`contributors:
   - Rick
   - Morty
   - Mr. President
+  - Beth Smith
 `);
   });
 });
@@ -110,15 +96,11 @@ describe('given valid yaml with spreaded object', () => {
       },
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`parameters:
+    expect(internals.processYaml(chunk, renderParams)).toEqual(`parameters:
   price: $100
   color: white
   size: xs
@@ -139,15 +121,12 @@ id: \${secondId}
       secondId: '1',
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`title: First document
+    expect(internals.processYaml(chunk, renderParams))
+      .toEqual(`title: First document
 id: '0'
 ---
 title: Second document
@@ -165,15 +144,12 @@ title: Third document
   const renderParams = {
     context: {},
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`title: First document
+    expect(internals.processYaml(chunk, renderParams))
+      .toEqual(`title: First document
 ---
 ---
 title: Third document
@@ -199,15 +175,12 @@ title: Next Document
       tags: ['draft', 'wip'],
     },
     path: 'template.yaml',
+    type: 'yaml' as const,
   };
 
   it('should work', () => {
-    expect(
-      internals.processYaml(chunk, {
-        ...renderParams,
-        type: 'yaml',
-      })
-    ).toEqual(`title: Test Yaml document
+    expect(internals.processYaml(chunk, renderParams))
+      .toEqual(`title: Test Yaml document
 description: Single text value without template
 created: '2019'
 attributes:

@@ -10,6 +10,7 @@ describe('given invalid script', () => {
     path: 'input.txt',
     script: 'whoot?',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should throw', () => {
@@ -24,6 +25,7 @@ describe('given script returning text value', () => {
     path: 'input.txt',
     script: '"world"',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -41,6 +43,7 @@ describe('given script returning object', () => {
     path: 'input.txt',
     script: '{ test: "q", another: "B" }',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -58,6 +61,7 @@ describe('given script returning array', () => {
     path: 'input.txt',
     script: '["one", "two"]',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -75,6 +79,7 @@ describe('given script returning empty array', () => {
     path: 'input.txt',
     script: '[]',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -92,6 +97,7 @@ describe('given script spreading an object', () => {
     path: 'input.txt',
     script: '...{ otherProp: "value" }',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -109,6 +115,7 @@ describe('given script spreading an array', () => {
     path: 'input.txt',
     script: '...[1, 2, 3]',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -126,6 +133,7 @@ describe('given script returning empty object', () => {
     path: 'input.txt',
     script: '{}',
     type: 'yaml',
+    isAllowedValue: () => true,
   };
 
   it('should work', () => {
@@ -136,7 +144,7 @@ describe('given script returning empty object', () => {
   });
 });
 
-describe('when script doesnt evaluate to a string, array or object', () => {
+describe('when script doesnt evaluate to a valid value', () => {
   const invalidScripts = {
     'a function': 'console.log',
     'an undefined': 'undefined',
@@ -150,6 +158,10 @@ describe('when script doesnt evaluate to a string, array or object', () => {
     path: 'input.txt',
     script: '',
     type: 'yaml',
+    isAllowedValue: value =>
+      (typeof value === 'object' && value !== null) ||
+      Array.isArray(value) ||
+      typeof value === 'string',
   };
 
   for (const [key, val] of Object.entries(invalidScripts)) {
@@ -170,11 +182,15 @@ describe('given no template in the source', () => {
   const chunk = 'First line\nSome text value here without template\nLast line';
 
   it('should ignore', () => {
-    const visitor = internals.buildEvaluateLeafCb(chunk, {
-      context: {},
-      path: 'input.yaml',
-      type: 'yaml',
-    });
+    const visitor = internals.buildEvaluateLeafCb(
+      chunk,
+      {
+        context: {},
+        path: 'input.yaml',
+        type: 'yaml',
+      },
+      () => true
+    );
     expect(visitor('Some text value here without template', '[1]')).toEqual({
       action: 'ignore',
     });
@@ -185,13 +201,17 @@ describe('given template in the source', () => {
   const chunk = 'First line\nSome text value here ${withTemplate}\nLast line';
 
   it('should ignore', () => {
-    const visitor = internals.buildEvaluateLeafCb(chunk, {
-      context: {
-        withTemplate: 'with template',
+    const visitor = internals.buildEvaluateLeafCb(
+      chunk,
+      {
+        context: {
+          withTemplate: 'with template',
+        },
+        path: 'input.yaml',
+        type: 'yaml',
       },
-      path: 'input.yaml',
-      type: 'yaml',
-    });
+      () => true
+    );
     expect(visitor('${withTemplate}', '[1]')).toEqual({
       action: 'set',
       newValue: 'with template',

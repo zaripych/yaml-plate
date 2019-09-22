@@ -1,6 +1,27 @@
 {
+  "name": "yaml-plate",
+  "version": "0.0.0-development",
+  "description": "Simple YAML/json templating using JavaScript",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "author": "@zaripych",
+  "license": "MIT",
+  "files": [
+    "lib"
+  ],
+  "bin": {
+    "yaml-plate": "./lib/yaml-plate.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/zaripych/yaml-plate.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node ./scripts/build.js",
+    "build:watch": "node ./scripts/build.js --watch",
     "declarations": "tsc -p ./tsconfig.declarations.json",
     "prebuild": "node ./scripts/clean.js",
     "clean": "node ./scripts/clean.js",
@@ -11,7 +32,8 @@
     "lint": "tslint -p . -t verbose",
     "check": "concurrently \"node ./scripts/build.js\" \"tsc\" \"tslint -p . -t verbose\"",
     "patch": "ts-deps patch",
-    "release": "semantic-release"
+    "release": "semantic-release",
+    "prepublishOnly": "yarn run build && yarn run declarations"
   },
   "husky": {
     "hooks": {
@@ -20,23 +42,26 @@
       "pre-push": "npm run check"
     }
   },
-  "name": "yaml-plate",
-  "version": "0.0.1",
-  "description": "Simple YAML/json/txt templating using JavaScript",
-  "main": "index.js",
-  "author": "@zaripych",
-  "license": "MIT",
   "dependencies": {
-    "fast-glob": "2.2.6",
-    "fs-extra": "7.0.1",
-    "js-yaml": "3.12.2",
-    "rxjs": "6.4.0",
-    "rxjs-marbles": "5.0.0",
-    "rxjs-stream": "3.0.1"
+    "fast-glob": "3.0.4",
+    "fs-extra": "8.1.0",
+    "js-yaml": "3.13.1",
+    "rxjs": "6.5.3",
+    "rxjs-stream": "3.0.2",
+    "yargs": "14.0.0"
   },
   "devDependencies": {
-    "@types/js-yaml": "3.12.0",
-    "@types/node": "8.10.40",
-    "ts-deps": "0.2.0"
+    "@types/jest": "24.0.18",
+    "@types/js-yaml": "3.12.1",
+    "@types/node": "10",
+    "@types/pump": "1.1.0",
+    "@types/yargs": "13.0.2",
+    "dotenv-expand": "5.1.0",
+    "rxjs-marbles": "5.0.3",
+    "rxjs-spy": "7.5.1",
+    "ts-deps": "0.4.4"
+  },
+  "resolutions": {
+    "ts-deps/semantic-release/marked": "^0.7.0"
   }
 }

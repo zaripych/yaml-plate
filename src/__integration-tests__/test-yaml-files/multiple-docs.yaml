@@ -1,0 +1,7 @@
+docId: 1
+content: First document content
+attributes: ${attributesByDocId[1]}
+---
+docId: 2
+content: Second document content
+attributes: ${attributesByDocId[2]}

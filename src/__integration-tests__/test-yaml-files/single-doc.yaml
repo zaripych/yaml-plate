@@ -1,0 +1,3 @@
+docId: 3
+content: Third document content
+attributes: ${attributesByDocId[3]}

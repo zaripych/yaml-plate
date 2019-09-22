@@ -1,0 +1,9 @@
+---
+docId: 7
+content: Seventh document content
+attributes: ${attributesByDocId[7]}
+---
+---
+docId: 8
+content: Eight document content
+attributes: ${...attributesByDocId[8]}

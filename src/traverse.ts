@@ -6,6 +6,10 @@ function isIterable(obj?: unknown): obj is Iterable<unknown> {
   return typeof obj[Symbol.iterator] === 'function';
 }
 
+function isTraversableObject(obj?: unknown): obj is TraversableObject {
+  return typeof obj === 'object' && !!obj;
+}
+
 // tslint:disable-next-line:interface-over-type-literal
 type TraversableObject = {
   [key: string]: unknown;
@@ -48,7 +52,7 @@ function actOnObject(
   next: Array<{ path: string; current: Traversable }>,
   leafVisitor: LeafVisitor
 ) {
-  if ((typeof value === 'object' || Array.isArray(value)) && !!value) {
+  if (isTraversableObject(value) || Array.isArray(value)) {
     if (set.has(value)) {
       throw new Error(
         'An object with recursive references found, cannot continue evaluation'
@@ -86,7 +90,7 @@ function actOnArray(
   next: Array<{ path: string; current: Traversable }>,
   leafVisitor: LeafVisitor
 ): number {
-  if ((typeof value === 'object' || Array.isArray(value)) && !!value) {
+  if (isTraversableObject(value) || Array.isArray(value)) {
     if (set.has(value)) {
       throw new Error(
         'An object with recursive references found, cannot continue evaluation'
@@ -135,7 +139,7 @@ export const traverseAndMutate = (
       current: instance,
     },
   ];
-  const set = new Set();
+  const set = new Set<Traversable>();
 
   while (next.length > 0) {
     const { path, current } = next[0];

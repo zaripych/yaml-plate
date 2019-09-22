@@ -103,6 +103,7 @@ interface IEvaluateParams extends IRenderParams {
   chunk: string;
   script: string;
   path: string;
+  isAllowedValue: (value: unknown) => boolean;
 }
 
 const evaluate = (params: IEvaluateParams): TraverseAction => {
@@ -136,21 +137,17 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
   );
 
   if (
-    (typeof newValue !== 'string' &&
-      typeof newValue !== 'object' &&
-      !Array.isArray(newValue)) ||
-    newValue === null
-  ) {
-    return {
-      action: 'remove',
-    };
-  } else if (
     spread &&
-    (Array.isArray(newValue) || typeof newValue === 'object')
+    (Array.isArray(newValue) || typeof newValue === 'object') &&
+    newValue !== null
   ) {
     return {
       action: 'spread',
       values: newValue,
+    };
+  } else if (!params.isAllowedValue(newValue)) {
+    return {
+      action: 'remove',
     };
   } else {
     return {
@@ -162,9 +159,10 @@ const evaluate = (params: IEvaluateParams): TraverseAction => {
 
 const buildEvaluateLeafCb = (
   chunk: string,
-  renderParams: IRenderParams
+  renderParams: IRenderParams,
+  isAllowedValue: (value: unknown) => boolean
 ): LeafVisitor => (val, path) => {
-  const scriptRegexResult = ScriptRegexp.exec(val /*?*/);
+  const scriptRegexResult = ScriptRegexp.exec(val);
   if (!scriptRegexResult || scriptRegexResult.length < 1) {
     return {
       action: 'ignore',
@@ -177,6 +175,7 @@ const buildEvaluateLeafCb = (
     chunk,
     script,
     path,
+    isAllowedValue,
     ...renderParams,
   });
 };
@@ -186,7 +185,18 @@ const processYaml = (chunk: string, renderParams: IRenderParams) => {
 
   const combined = [];
 
-  const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(chunk, renderParams);
+  const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(
+    chunk,
+    renderParams,
+    newValue => {
+      return (
+        typeof newValue === 'number' ||
+        typeof newValue === 'string' ||
+        Array.isArray(newValue) ||
+        (typeof newValue === 'object' && newValue !== null)
+      );
+    }
+  );
 
   for (const doc of loaded) {
     if (doc) {
@@ -204,7 +214,18 @@ const processYaml = (chunk: string, renderParams: IRenderParams) => {
 const processJson = (chunk: string, renderParams: IRenderParams) => {
   const doc = JSON.parse(chunk) as {};
 
-  const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(chunk, renderParams);
+  const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(
+    chunk,
+    renderParams,
+    newValue => {
+      return (
+        typeof newValue === 'number' ||
+        typeof newValue === 'string' ||
+        Array.isArray(newValue) ||
+        (typeof newValue === 'object' && newValue !== null)
+      );
+    }
+  );
 
   traverseAndMutate(doc, evaluateLeaf);
 

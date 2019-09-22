@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 
 type GlobPattern = string;
 
-export type SourceType = 'json' | 'yaml' | 'text';
+export type SourceType = 'json' | 'yaml';
 
 export interface IInputEntry {
   /**
@@ -35,7 +35,14 @@ export interface IOutputEntry {
   contents: Observable<string>;
 }
 
-export type Input = GlobPattern | Observable<IInputEntry>;
+export interface IInputPattern {
+  pattern: GlobPattern;
+  sorted?: boolean;
+}
+
+export type InputStream = Observable<IInputEntry>;
+
+export type Input = GlobPattern | IInputPattern | InputStream;
 
 export type Output =
   | {
@@ -44,8 +51,8 @@ export type Output =
        */
       directory: string;
       /**
-       * If the output directory contains only single directory then it can be eliminated
-       * from the output path by specifying it here.
+       * If the output directory expected to contain only a single directory then it can be eliminated
+       * from the output path by specifying it here - used to flatten the output.
        */
       baseDir?: string;
     }
@@ -54,6 +61,9 @@ export type Output =
        * Output to a combined text file;
        */
       file: string;
+    }
+  | {
+      stdout: true;
     };
 
 export type FilePathCtx = string;
@@ -70,7 +80,7 @@ export interface IEvaluateConfig {
    * Input templates for evaluation
    *
    * Can be one of the following:
-   * - A GLOB pattern of input YAML/JSON/txt files
+   * - A GLOB pattern of input YAML/JSON files
    * - An Observable stream of file, type of file and its contents
    */
   input: Input;

@@ -1,4 +1,5 @@
 import { IEvaluateConfig, EvaluatedObjectCtx, FnCtx } from './types';
+import { resolve as resolvePath } from 'path';
 
 function interopRequireDefault<T>(
   obj: T | { __esModule: true; default: T } | undefined
@@ -31,7 +32,7 @@ export async function resolveContext(
 ): Promise<EvaluatedObjectCtx> {
   if (typeof context === 'string') {
     const result = interopRequireDefault<EvaluatedObjectCtx | FnCtx>(
-      require(context) as {}
+      require(resolvePath(context)) as {}
     ).default;
     return resolve(result);
   }
