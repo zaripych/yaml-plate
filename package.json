@@ -2,67 +2,63 @@
   "name": "yaml-plate",
   "version": "0.0.0-development",
   "description": "Simple YAML/json templating using JavaScript",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "author": "@zaripych",
-  "license": "MIT",
-  "files": [
-    "lib"
-  ],
-  "bin": {
-    "yaml-plate": "./lib/yaml-plate.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+ssh://git@github.com/zaripych/yaml-plate.git"
   },
-  "publishConfig": {
-    "access": "public"
-  },
+  "license": "MIT",
+  "author": "@zaripych",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "bin": { "yaml-plate": "./lib/yaml-plate.js" },
+  "files": ["lib"],
   "scripts": {
-    "build": "node ./scripts/build.js",
-    "build:watch": "node ./scripts/build.js --watch",
-    "declarations": "tsc -p ./tsconfig.declarations.json",
     "prebuild": "node ./scripts/clean.js",
+    "build": "node ./scripts/build.js -s",
+    "build:watch": "node ./scripts/build.js --watch",
+    "check": "concurrently --raw -c \"node ./scripts/build.js\" \"tsc\" \"eslint . --ext .js,.jsx,.ts,.tsx -f pretty\"",
     "clean": "node ./scripts/clean.js",
-    "test": "jest --color",
-    "integration": "jest --config ./jest.config.integration.js --color -i",
     "combine-coverage": "node ./scripts/combineCoverage.js",
-    "type-check": "tsc",
-    "lint": "tslint -p . -t verbose",
-    "check": "concurrently \"node ./scripts/build.js\" \"tsc\" \"tslint -p . -t verbose\"",
+    "declarations": "tsc -p ./tsconfig.declarations.json",
+    "eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "integration": "jest --config ./jest.config.integration.js --color -i",
+    "lint": "yarn run eslint -f pretty",
     "patch": "ts-deps patch",
-    "release": "semantic-release",
-    "prepublishOnly": "yarn run build && yarn run declarations"
+    "prepublishOnly": "yarn run build && yarn run declarations",
+    "release": "node ./scripts/release.js",
+    "test": "jest --color",
+    "type-check": "tsc"
   },
   "husky": {
     "hooks": {
+      "pre-commit": "lint-staged",
       "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "pre-commit": "pretty-quick --staged",
-      "pre-push": "npm run check"
+      "pre-push": "yarn run check"
     }
   },
+  "lint-staged": {
+    "*.{tsx,jsx,ts,js,json,md,yaml,yml}": ["prettier --write"],
+    "package.json": ["sort-package-json"]
+  },
+  "resolutions": { "ts-deps/semantic-release/marked": "^0.7.0" },
   "dependencies": {
-    "fast-glob": "3.1.1",
+    "fast-glob": "3.2.2",
     "fs-extra": "8.1.0",
     "js-yaml": "3.13.1",
-    "rxjs": "6.5.3",
-    "rxjs-stream": "3.1.0",
-    "yargs": "15.0.2"
+    "rxjs": "6.5.4",
+    "rxjs-stream": "3.1.1",
+    "yargs": "15.1.0"
   },
   "devDependencies": {
-    "@types/jest": "24.0.23",
-    "@types/js-yaml": "3.12.1",
+    "@types/js-yaml": "3.12.2",
     "@types/node": "10",
     "@types/pump": "1.1.0",
-    "@types/yargs": "13.0.3",
     "dotenv-expand": "5.1.0",
-    "husky": "3.1.0",
+    "husky": "4.2.3",
+    "lint-staged": "10.0.8",
     "rxjs-marbles": "5.0.4",
     "rxjs-spy": "7.5.1",
-    "ts-deps": "0.9.0"
+    "ts-deps": "0.15.0"
   },
-  "resolutions": {
-    "ts-deps/semantic-release/marked": "^0.7.0"
-  }
+  "publishConfig": { "access": "public" }
 }

@@ -9,3 +9,6 @@ package
 .pnp
 integration-test-*
 yaml-plate-*.tgz
+.DS_Store
+dist
+.local-semantic-release

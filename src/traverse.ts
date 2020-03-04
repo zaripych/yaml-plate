@@ -2,8 +2,8 @@ function isIterable(obj?: unknown): obj is Iterable<unknown> {
   if (typeof obj !== 'object' || obj === null) {
     return false;
   }
-  // @ts-ignore
-  return typeof obj[Symbol.iterator] === 'function';
+  const map = obj as { [Symbol.iterator]: () => void };
+  return typeof map[Symbol.iterator] === 'function';
 }
 
 function isTraversableObject(obj?: unknown): obj is TraversableObject {
@@ -112,7 +112,7 @@ function actOnArray(
         return i;
       }
 
-      const toSpread = Array.from(result.values as Iterable<unknown>);
+      const toSpread = Array.from(result.values);
       current.splice(i, 1, ...toSpread);
       i -= 1;
       i += toSpread.length;

@@ -45,7 +45,7 @@ export const spawnAndCheck = (
 
   console.log(result.output.filter(Boolean).join(''));
 
-  if (result.error as (Error | undefined)) {
+  if (result.error) {
     throw result.error;
   }
 

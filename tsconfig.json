@@ -2,8 +2,8 @@
   "extends": "./node_modules/ts-deps/lib/config/tsconfig.default.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "lib",
-    "paths": { "@src": ["./src"], "@src/*": ["./src/*"] }
+    "paths": { "@src": ["./src"], "@src/*": ["./src/*"] },
+    "outDir": "lib"
   },
   "include": ["src"]
 }
