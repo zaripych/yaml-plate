@@ -10,8 +10,12 @@
   "author": "@zaripych",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
-  "bin": { "yaml-plate": "./lib/yaml-plate.js" },
-  "files": ["lib"],
+  "bin": {
+    "yaml-plate": "./lib/yaml-plate.js"
+  },
+  "files": [
+    "lib"
+  ],
   "scripts": {
     "prebuild": "node ./scripts/clean.js",
     "build": "node ./scripts/build.js -s",
@@ -37,10 +41,16 @@
     }
   },
   "lint-staged": {
-    "*.{tsx,jsx,ts,js,json,md,yaml,yml}": ["prettier --write"],
-    "package.json": ["sort-package-json"]
+    "*.{tsx,jsx,ts,js,json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "package.json": [
+      "sort-package-json"
+    ]
   },
-  "resolutions": { "ts-deps/semantic-release/marked": "^0.7.0" },
+  "resolutions": {
+    "ts-deps/semantic-release/marked": "^0.7.0"
+  },
   "dependencies": {
     "fast-glob": "3.2.2",
     "fs-extra": "8.1.0",
@@ -58,7 +68,9 @@
     "lint-staged": "10.0.8",
     "rxjs-marbles": "5.0.4",
     "rxjs-spy": "7.5.1",
-    "ts-deps": "0.15.0"
+    "ts-deps": "0.15.2"
   },
-  "publishConfig": { "access": "public" }
+  "publishConfig": {
+    "access": "public"
+  }
 }
