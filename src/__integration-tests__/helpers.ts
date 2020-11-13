@@ -51,7 +51,9 @@ export const spawnAndCheck = (
 
   if (result.status !== 0) {
     throw new Error(
-      `process ${args[0]} exit with non-zero status code: ${result.status}`
+      `process ${args[0]} exit with non-zero status code: ${String(
+        result.status
+      )}`
     );
   }
 

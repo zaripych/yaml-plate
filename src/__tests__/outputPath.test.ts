@@ -1,7 +1,7 @@
 import { outputPath } from '@src/outputPath';
 import { join, resolve } from 'path';
 
-describe(outputPath.name, () => {
+describe('outputPath', () => {
   describe('given file outside current dir', () => {
     const outDir = './out/dir';
     const file = resolve(join(__dirname, '../../../x/something.yaml'));

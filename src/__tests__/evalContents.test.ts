@@ -1,12 +1,12 @@
 import { evalContents } from '@src/eval';
 import { marbles, Context } from 'rxjs-marbles/jest';
-import { IInputEntry, IOutputEntry } from 'src/types';
+import { IInputEntry, IOutputEntry } from '../types';
 
 describe('evalContents', () => {
   describe('given empty stream', () => {
     it(
       'should produce an empty stream',
-      marbles(m => {
+      marbles((m) => {
         const source = m.hot('-^|-'); // prettier-ignore
         const subs =          '^!'; // prettier-ignore
         const expected =     '-^|-'; // prettier-ignore
@@ -22,7 +22,7 @@ describe('evalContents', () => {
   describe('given infinite stream', () => {
     it(
       'should never unsubscribe',
-      marbles(m => {
+      marbles((m) => {
         const source = m.hot('-^--'); // prettier-ignore
         const subs =          '^'; // prettier-ignore
         const expected =     '-^--'; // prettier-ignore
@@ -58,7 +58,7 @@ describe('evalContents', () => {
 
     it(
       'should produce single entry',
-      marbles(m => {
+      marbles((m) => {
         const source = m.hot('-^i|', input(m)); // prettier-ignore
         const subs =          '^-!'; // prettier-ignore
         const expected =     '-^o|'; // prettier-ignore

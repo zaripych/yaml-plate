@@ -161,7 +161,7 @@ const buildEvaluateLeafCb = (
   chunk: string,
   renderParams: IRenderParams,
   isAllowedValue: (value: unknown) => boolean
-): LeafVisitor => (val, path) => {
+): LeafVisitor => (val, _path) => {
   const scriptRegexResult = ScriptRegexp.exec(val);
   if (!scriptRegexResult || scriptRegexResult.length < 1) {
     return {
@@ -174,7 +174,6 @@ const buildEvaluateLeafCb = (
   return evaluate({
     chunk,
     script,
-    path,
     isAllowedValue,
     ...renderParams,
   });
@@ -188,7 +187,7 @@ const processYaml = (chunk: string, renderParams: IRenderParams) => {
   const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(
     chunk,
     renderParams,
-    newValue => {
+    (newValue) => {
       return (
         typeof newValue === 'number' ||
         typeof newValue === 'string' ||
@@ -217,7 +216,7 @@ const processJson = (chunk: string, renderParams: IRenderParams) => {
   const evaluateLeaf: LeafVisitor = buildEvaluateLeafCb(
     chunk,
     renderParams,
-    newValue => {
+    (newValue) => {
       return (
         typeof newValue === 'number' ||
         typeof newValue === 'string' ||
@@ -238,11 +237,11 @@ interface IRenderParams extends Pick<IInputEntry, 'path' | 'type'> {
 
 const renderJsonAndYaml = (renderParams: IRenderParams) => {
   return (stream: Observable<string>): Observable<string> => {
-    return new Observable<string>(subscriber => {
+    return new Observable<string>((subscriber) => {
       const results = stream.pipe(
         toArray(),
-        map(items => items.join('')),
-        map(chunk => {
+        map((items) => items.join('')),
+        map((chunk) => {
           if (renderParams.type === 'yaml') {
             return processYaml(chunk, renderParams);
           } else if (renderParams.type === 'json') {
@@ -295,7 +294,7 @@ export const evalContents = (
     stream: Observable<IInputEntry>
   ): Observable<IOutputEntry> =>
     stream.pipe(
-      map(arg => ({
+      map((arg) => ({
         path: arg.path,
         type: arg.type,
         contents: deps.transformContents(arg, context, arg.contents),

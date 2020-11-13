@@ -93,15 +93,17 @@ describe('yaml-plate', () => {
       it('contents of the directory and combined file should be same', async () => {
         const files = await sortedDirectoryContents(outDir);
         const contentsFromDir = await Promise.all(
-          files.map(file => readFile(join(outDir, file), 'utf8'))
+          files.map((file) => readFile(join(outDir, file), 'utf8'))
         );
         const contentFromCombined = await readFile(outFile, 'utf8');
 
         const dirLoaded = contentsFromDir.reduce((acc, item) => {
-          const data = yaml.safeLoadAll(item);
+          const data = yaml.safeLoadAll(item) as Array<unknown>;
           return [...acc, ...(data.length === 0 ? [null] : data)];
         }, []);
-        const combinedLoaded = yaml.safeLoadAll(contentFromCombined);
+        const combinedLoaded = yaml.safeLoadAll(contentFromCombined) as Array<
+          unknown
+        >;
 
         expect(combinedLoaded).toEqual(dirLoaded);
       });

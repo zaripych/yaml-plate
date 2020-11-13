@@ -21,7 +21,7 @@ function resolve(context?: EvaluatedObjectCtx | FnCtx) {
   }
 
   if (typeof context === 'function') {
-    return Promise.resolve(context());
+    return Promise.resolve(context() as {});
   }
 
   return Promise.resolve({});
@@ -32,8 +32,10 @@ export async function resolveContext(
 ): Promise<EvaluatedObjectCtx> {
   if (typeof context === 'string') {
     const result = interopRequireDefault<EvaluatedObjectCtx | FnCtx>(
+      // eslint-disable-next-line
       require(resolvePath(context)) as {}
     ).default;
+
     return resolve(result);
   }
 
